@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Malla Interactiva · Periodismo</title>
+  <meta name="description" content="Malla interactiva de Periodismo (2025) · UA. Búsqueda, filtros por área y competencias, créditos por semestre.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { color-scheme: light; }
+    html, body { height: 100%; }
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-b from-white to-slate-50 text-slate-900">
+  <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/80 border-b">
+    <div class="mx-auto max-w-7xl px-4 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-bold">Malla Interactiva · Periodismo</h1>
+          <p class="text-xs text-slate-600">
+            Licenciatura en Comunicación Social · Título: Periodista · Universidad Autónoma de Chile
+          </p>
+        </div>
+        <div id="legend" class="flex items-center gap-2 text-xs"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-6">
+    <section class="mb-6 grid grid-cols-1 gap-3 md:grid-cols-4">
+      <div class="col-span-1 md:col-span-2">
+        <label class="block text-xs font-medium text-slate-600">Buscar asignatura</label>
+        <input id="q" class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-600"
+               placeholder="Ej: Periodismo de Datos, Televisión, Proyecto de Título…">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-600">Filtrar por área</label>
+        <select id="area" class="mt-1 w-full rounded-xl border bg-white px-3 py-2">
+          <option value="ALL">Todas</option>
+          <option value="BASICA">Formación Básica</option>
+          <option value="PROFESIONAL">Formación Profesional</option>
+          <option value="GENERAL">Formación General</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-600">Filtrar por competencia</label>
+        <select id="tag" class="mt-1 w-full rounded-xl border bg-white px-3 py-2"></select>
+      </div>
+    </section>
+
+    <nav id="semNav" class="mb-4 flex flex-wrap items-center gap-2"></nav>
+
+    <div class="mb-4 flex flex-wrap items-center gap-3 text-sm">
+      <span id="count" class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium bg-white border-slate-200">0 asignaturas</span>
+      <span id="credits" class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium bg-white border-slate-200">0 créditos (estimado)</span>
+    </div>
+
+    <section id="grid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"></section>
+
+    <p class="mt-6 text-xs text-slate-500">
+      Prototipo estático para GitHub Pages. Datos y distribución referenciales; edita el bloque JSON en el script para ajustar.
+    </p>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-xl rounded-3xl bg-white p-6 shadow-xl">
+      <div class="flex items-start justify-between gap-2">
+        <h3 id="mTitle" class="text-lg font-bold"></h3>
+        <button id="mClose" class="rounded-xl bg-slate-900 px-3 py-1.5 text-white">Cerrar</button>
+      </div>
+      <div id="mBadges" class="mt-2 flex flex-wrap gap-2"></div>
+      <p class="mt-3 text-sm text-slate-600">
+        Descripción editable. Agrega objetivos, contenidos, requisitos o vínculos a programas.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const DATA = {"meta": {"career": "Periodismo", "degree": "Licenciatura en Comunicación Social", "title": "Periodista", "institution": "Universidad Autónoma de Chile", "cohorts": [2025], "tagsLegend": {"HC": "Habilidades de Comunicación", "TE": "Trabajo en Equipo", "CE": "Comportamiento Ético", "PC": "Pensamiento Crítico", "RS": "Responsabilidad Social"}, "areas": {"BASICA": "ÁREA DE FORMACIÓN BÁSICA", "PROFESIONAL": "ÁREA DE FORMACIÓN PROFESIONAL", "GENERAL": "ÁREA DE FORMACIÓN GENERAL"}}, "semesters": [{"n": 1, "cycle": "CICLO INICIAL", "courses": [{"name": "Teoría de la Comunicación", "area": "BASICA", "tags": ["HC", "PC"], "credits": 5}, {"name": "Historia Política y Social de Chile", "area": "BASICA", "tags": ["HC", "PC"], "credits": 5}, {"name": "Transformaciones Socioculturales Contemporáneas", "area": "BASICA", "tags": ["TE", "PC"], "credits": 5}, {"name": "Redacción General", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 6}, {"name": "Introducción al Periodismo y Desafíos de la Era Digital", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 6}, {"name": "Electivo de Comunicación", "area": "GENERAL", "tags": ["CE"], "credits": 3}]}, {"n": 2, "cycle": "CICLO INICIAL", "courses": [{"name": "Semiótica", "area": "BASICA", "tags": ["HC", "PC"], "credits": 5}, {"name": "Pensamiento y Cultura Latinoamericana", "area": "BASICA", "tags": ["TE", "PC"], "credits": 5}, {"name": "Narración Periodística", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 6}, {"name": "Taller de Reporteo", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 6}, {"name": "Herramientas Digitales I", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 4}, {"name": "Electivo de Comunicación", "area": "GENERAL", "tags": ["CE"], "credits": 3}]}, {"n": 3, "cycle": "CICLO INICIAL", "courses": [{"name": "Cultura Visual", "area": "BASICA", "tags": ["HC", "PC"], "credits": 5}, {"name": "Investigación Cuantitativa", "area": "BASICA", "tags": ["PC"], "credits": 5}, {"name": "Narración Escrita", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 6}, {"name": "Narración Radial", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 5}, {"name": "Herramientas Digitales II", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 4}, {"name": "Electivo de Desarrollo del Pensamiento", "area": "GENERAL", "tags": ["PC"], "credits": 3}]}, {"n": 4, "cycle": "CICLO INICIAL", "courses": [{"name": "Investigación Cualitativa", "area": "BASICA", "tags": ["HC", "PC"], "credits": 5}, {"name": "Marco Normativo del Periodismo", "area": "BASICA", "tags": ["PC"], "credits": 5}, {"name": "Taller de Periodismo Prensa", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 6}, {"name": "Taller de Diseño Periodístico", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 5}, {"name": "Inglés I", "area": "GENERAL", "tags": [], "credits": 3}, {"name": "Electivo de Desarrollo Personal", "area": "GENERAL", "tags": [], "credits": 3}]}, {"n": 5, "cycle": "CICLO INTERMEDIO", "courses": [{"name": "Periodismo de Investigación", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 6}, {"name": "Narración Audiovisual", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 5}, {"name": "Periodismo Fotográfico Digital", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 5}, {"name": "Herramientas Digitales III", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 4}, {"name": "Inglés II", "area": "GENERAL", "tags": [], "credits": 3}]}, {"n": 6, "cycle": "CICLO INTERMEDIO", "courses": [{"name": "Opinión Pública", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 5}, {"name": "Periodismo de Datos y Precisión I", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 5}, {"name": "Narración Gráfica", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 5}, {"name": "Taller de Convergencia Digital", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 6}, {"name": "Organizaciones Sociales", "area": "PROFESIONAL", "tags": ["CE", "RS"], "credits": 4}, {"name": "Inglés III", "area": "GENERAL", "tags": [], "credits": 3}]}, {"n": 7, "cycle": "CICLO INTERMEDIO", "courses": [{"name": "Narración Interactiva", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 5}, {"name": "Periodismo de Datos y Precisión II", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 5}, {"name": "Taller de Análisis e Integración Periodística", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 6}, {"name": "Comunicación Organizacional", "area": "PROFESIONAL", "tags": ["HC", "CE"], "credits": 4}, {"name": "Comunicación Estratégica", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 4}, {"name": "Inglés IV", "area": "GENERAL", "tags": [], "credits": 3}]}, {"n": 8, "cycle": "CICLO AVANZADO", "courses": [{"name": "Taller de Periodismo Televisión", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 6}, {"name": "Optativo de Periodismo Especializado I", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 4}, {"name": "Optativo de Periodismo Especializado II", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 4}, {"name": "Optativo de Profundización en Edición", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 4}, {"name": "Inglés V", "area": "GENERAL", "tags": [], "credits": 3}, {"name": "Electivo de Ética", "area": "GENERAL", "tags": ["CE"], "credits": 3}]}, {"n": 9, "cycle": "CICLO AVANZADO", "courses": [{"name": "Taller de Periodismo Radio", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 6}, {"name": "Proyecto de Título I", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 6}, {"name": "Optativo de Periodismo Especializado III", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 4}, {"name": "Formulación de Proyectos y Emprendimiento", "area": "PROFESIONAL", "tags": ["HC", "RS"], "credits": 4}, {"name": "Pre-Práctica", "area": "PROFESIONAL", "tags": ["HC", "TE"], "credits": 2}, {"name": "Electivo de Responsabilidad Social", "area": "GENERAL", "tags": ["RS"], "credits": 3}]}, {"n": 10, "cycle": "CICLO AVANZADO", "courses": [{"name": "Proyecto de Título II", "area": "PROFESIONAL", "tags": ["HC", "PC"], "credits": 8}, {"name": "Práctica Profesional", "area": "PROFESIONAL", "tags": ["HC", "TE", "CE", "PC", "RS"], "credits": 14}]}]};
+
+    const AREA_BADGE = {
+      BASICA: "bg-sky-50 text-sky-700 border-sky-200",
+      PROFESIONAL: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      GENERAL: "bg-amber-50 text-amber-700 border-amber-200",
+    };
+
+    const TAG_COLORS = {
+      HC: "bg-neutral-100 text-neutral-800 border-neutral-200",
+      TE: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      CE: "bg-rose-50 text-rose-700 border-rose-200",
+      PC: "bg-blue-50 text-blue-700 border-blue-200",
+      RS: "bg-green-50 text-green-700 border-green-200",
+    };
+
+    // State
+    let activeSem = 1;
+    let state = { q: "", area: "ALL", tag: "ALL" };
+
+    // Elements
+    const elLegend = document.getElementById("legend");
+    const elQ = document.getElementById("q");
+    const elArea = document.getElementById("area");
+    const elTag = document.getElementById("tag");
+    const elSemNav = document.getElementById("semNav");
+    const elGrid = document.getElementById("grid");
+    const elCount = document.getElementById("count");
+    const elCredits = document.getElementById("credits");
+    const elModal = document.getElementById("modal");
+    const elMTitle = document.getElementById("mTitle");
+    const elMBadges = document.getElementById("mBadges");
+    const elMClose = document.getElementById("mClose");
+
+    function badge(text, extraClass="") {
+      const span = document.createElement("span");
+      span.className = `inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${extraClass}`;
+      span.textContent = text;
+      return span;
+    }
+
+    function renderLegend() {
+      elLegend.innerHTML = "";
+      for (const k of Object.keys(DATA.meta.tagsLegend)) {
+        const b = badge(k, TAG_COLORS[k] || "");
+        b.title = DATA.meta.tagsLegend[k];
+        elLegend.appendChild(b);
+      }
+    }
+
+    function renderTagOptions() {
+      elTag.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "ALL"; optAll.textContent = "Todas";
+      elTag.appendChild(optAll);
+      for (const k of Object.keys(DATA.meta.tagsLegend)) {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = `${k} · ${DATA.meta.tagsLegend[k]}`;
+        elTag.appendChild(opt);
+      }
+    }
+
+    function renderSemNav() {
+      elSemNav.innerHTML = "";
+      for (const s of DATA.semesters) {
+        const btn = document.createElement("button");
+        btn.className = `rounded-2xl border px-3 py-1.5 text-sm font-medium transition-colors ${
+          activeSem === s.n ? "bg-slate-900 text-white border-slate-900" : "bg-white hover:bg-slate-100"
+        }`;
+        btn.textContent = `${s.n}º semestre`;
+        const span = document.createElement("span");
+        span.className = "ml-2 text-xs text-slate-400";
+        span.textContent = s.cycle;
+        btn.appendChild(span);
+        btn.addEventListener("click", () => { activeSem = s.n; renderAll(); });
+        elSemNav.appendChild(btn);
+      }
+    }
+
+    function getActive() {
+      return DATA.semesters.find(s => s.n === activeSem);
+    }
+
+    function filteredCourses() {
+      const a = getActive();
+      const query = state.q.trim().toLowerCase();
+      return (a?.courses || [])
+        .filter(c => state.area === "ALL" ? true : c.area === state.area)
+        .filter(c => state.tag === "ALL" ? true : (c.tags || []).includes(state.tag))
+        .filter(c => query ? c.name.toLowerCase().includes(query) : true);
+    }
+
+    function sumCredits(courses) {
+      return courses.reduce((acc, c) => acc + (c.credits || 0), 0);
+    }
+
+    function courseCard(course) {
+      const btn = document.createElement("button");
+      btn.className = "group w-full text-left rounded-2xl border bg-white p-3 shadow-sm hover:shadow-md transition-shadow";
+      const top = document.createElement("div");
+      top.className = "flex items-start justify-between gap-2";
+
+      const h4 = document.createElement("h4");
+      h4.className = "font-semibold leading-snug group-hover:underline";
+      h4.textContent = course.name;
+
+      const areaB = badge(course.area, AREA_BADGE[course.area] || "");
+
+      top.appendChild(h4);
+      top.appendChild(areaB);
+
+      const tagsRow = document.createElement("div");
+      tagsRow.className = "mt-2 flex flex-wrap gap-1.5";
+
+      for (const t of (course.tags || [])) {
+        tagsRow.appendChild(badge(t, TAG_COLORS[t] || ""));
+      }
+      if (course.credits) {
+        tagsRow.appendChild(badge(`${course.credits} cr`, "bg-gray-50 text-gray-700 border-gray-200"));
+      }
+
+      btn.appendChild(top);
+      btn.appendChild(tagsRow);
+
+      btn.addEventListener("click", () => openModal(course));
+      return btn;
+    }
+
+    function renderGrid() {
+      elGrid.innerHTML = "";
+      const list = filteredCourses();
+      for (const c of list) elGrid.appendChild(courseCard(c));
+      if (list.length === 0) {
+        const div = document.createElement("div");
+        div.className = "col-span-full rounded-2xl border bg-white p-6 text-center text-slate-500";
+        div.textContent = "No hay resultados para los filtros actuales.";
+        elGrid.appendChild(div);
+      }
+      elCount.textContent = `${list.length} asignaturas`;
+      const totalCr = sumCredits(getActive()?.courses || []);
+      elCredits.textContent = `${totalCr} créditos (estimado)`;
+    }
+
+    function openModal(course) {
+      elMTitle.textContent = course.name;
+      elMBadges.innerHTML = "";
+      elMBadges.appendChild(badge(course.area, AREA_BADGE[course.area] || ""));
+      for (const t of (course.tags || [])) elMBadges.appendChild(badge(t, TAG_COLORS[t] || ""));
+      if (course.credits) elMBadges.appendChild(badge(`${course.credits} créditos`, "bg-gray-50 text-gray-700 border-gray-200"));
+      elModal.classList.remove("hidden");
+      elModal.classList.add("flex");
+    }
+
+    function closeModal() {
+      elModal.classList.add("hidden");
+      elModal.classList.remove("flex");
+    }
+
+    elMClose.addEventListener("click", closeModal);
+    elModal.addEventListener("click", (e) => { if (e.target === elModal) closeModal(); });
+
+    function renderAll() {
+      renderSemNav();
+      renderGrid();
+    }
+
+    // Listeners
+    elQ.addEventListener("input", e => { state.q = e.target.value; renderGrid(); });
+    elArea.addEventListener("change", e => { state.area = e.target.value; renderGrid(); });
+    elTag.addEventListener("change", e => { state.tag = e.target.value; renderGrid(); });
+
+    // Init
+    function init() {
+      // Legend
+      renderLegend();
+      // Tag options
+      renderTagOptions();
+      // Initial render
+      renderAll();
+    }
+    init();
+  </script>
+</body>
+</html>
